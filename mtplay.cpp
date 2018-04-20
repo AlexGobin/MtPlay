@@ -2,6 +2,7 @@
 #include <QFileDialog>
 
 
+static bool isOk = false;
 
 mtplay::mtplay(QWidget *parent)
 	: QWidget(parent)
@@ -10,6 +11,11 @@ mtplay::mtplay(QWidget *parent)
 
 	//启动所有线程
 	openThread();
+
+	//定时器
+	timer = new QTimer(this);
+	connect(timer, &QTimer::timeout, this, &mtplay::RefreshTimer);
+	timer->start(40);
 
 	//打开按钮
 	connect(ui.btn_open, &QPushButton::clicked, this, &mtplay::openfile);
@@ -22,14 +28,15 @@ mtplay::mtplay(QWidget *parent)
 
 	connect(ReadThread, &Mt_ReadThread::VideoTime, this, &mtplay::ShowVideoTime);
 
-	this->startTimer(40);//启动播放计时器
-
 	//滑动条事件
 	connect(ui.mySlider, &QSlider::sliderPressed, this, &mtplay::SliderPress);
 	connect(ui.mySlider, &QSlider::sliderReleased, this, &mtplay::SliderRelease);
 
 	///右上角关闭链接槽函数
-	connect(this, &mtplay::destroy, this, &mtplay::myClose);
+	connect(this, &mtplay::destroyed, this, &mtplay::myClose);
+
+	///
+	connect(ui.btn_play, &QPushButton::clicked, this, &mtplay::isPause);
 
 }
 
@@ -39,6 +46,7 @@ mtplay::~mtplay()
 	
 }
 
+//打开文件
 void mtplay::openfile()
 {
 	//std::cout << "open file!" << std::endl;
@@ -46,8 +54,15 @@ void mtplay::openfile()
 	if (filename.isEmpty())
 	{
 		return;
-	}
+	}	
 	emit readTd(filename);
+}
+
+//
+void mtplay::isPause()
+{
+	isOk = !isOk;
+	ThreadPress(isOk);
 }
 
 //显示视频总时长
@@ -61,31 +76,33 @@ void mtplay::ShowVideoTime(int totalMs1)
 	ui.label_timeplay->setText(buf);
 }
 
+
+
 //鼠标按下滑动条事件
 void mtplay::SliderPress()
 {
-// 	std::cout << "按下了滑动条!" << std::endl;
-// 	ThreadPress(true);   //暂停所有线程
-// 	//QThread::msleep(5);
-// 	ThreadClear();		 //
-// 	QThread::msleep(5);
-// 	ReadThread->queueClear();
-
-	ReadThread->ThreadPress(true);
-	ReadThread->ThreadClear();
-
+	ThreadPress(true);
+	timer->stop();
+	ReadThread->queueClear();
+	//ThreadClear();
 
 }
 
 //鼠标松开滑动条事件
 void mtplay::SliderRelease()
 {
-	std::cout << "松开了滑动条!" << std::endl;
+	
+	//std::cout << "松开了滑动条!" << std::endl;
 	double pos = 0.0;
 	pos = (double)ui.mySlider->value() / (double)ui.mySlider->maximum();
-	ui.mySlider->setValue(pos * 1000);
+	std::cout << "pos:" << pos << std::endl;
+	//ui.mySlider->setValue(pos * 1000);
+
+	QThread::msleep(3);
 	ReadThread->seek(pos); //清空缓冲
-	ReadThread->ThreadPress(false);
+	
+	ThreadPress(false);
+	timer->start(40);
 }
 
 
@@ -93,10 +110,11 @@ void mtplay::SliderRelease()
 void mtplay::myClose()
 {
 	//回收视频线程
+	delete timer;  //回收定时器
 	VideoThread->set(false);
 	AudiaoThread->set(false);
 	ReadThread->set(false);
-	QThread::msleep(10);
+
 
 	QVideoThread->quit();
 	QVideoThread->wait();
@@ -187,14 +205,13 @@ void mtplay::videosize(int width, int height)
 }
 
 //重写定时器函数
-void mtplay::timerEvent(QTimerEvent *e)
+void mtplay::RefreshTimer()
 {
 	char buf[32] = { 0 };
 	int min = (apts / 1000) / 60;
 	int sec = (apts / 1000) % 60;
 	sprintf(buf, "%03d:%02d", min, sec);
 	ui.label_time->setText(buf);
-
 	if (totalSec >0)
 	{
 		float rate = (float)apts / (float)totalSec;

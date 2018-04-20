@@ -27,7 +27,7 @@ public:
 	//存储视频文件信息结构体 解封装
 	AVFormatContext	* pFormatCtx = NULL;
 	//获取视频或音频信息
-	AVCodecParameters * AV = NULL;
+	//AVCodecParameters * AV = NULL;
 	//
 	std::mutex mux;
 

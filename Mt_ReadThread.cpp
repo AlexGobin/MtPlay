@@ -30,14 +30,6 @@ void Mt_ReadThread::run(QString filename)
 	if (ret != 0)
 		return;
 
-	if (as)
-	{
-		avcodec_parameters_free(&as);
-	}
-	if (vs)
-	{
-		avcodec_parameters_free(&vs);
-	}
 
 	IO->AV_info(&as, 0);
 	IO->AV_info(&vs, 1);
@@ -77,10 +69,10 @@ void Mt_ReadThread::run(QString filename)
 		QThread::msleep(8);
 	}
 
-	avcodec_parameters_free(&as);
-	avcodec_parameters_free(&vs);
+	//avcodec_parameters_free(&as);
+	//avcodec_parameters_free(&vs);
 	ThreadClear();
-	queueClear();
+	queueClear();		//队列内存清理
 	close();
 }
 
@@ -118,7 +110,11 @@ void Mt_ReadThread::queueClear()
 {
 	while (true)
 	{
-		mux.lock();
+		if (AudioQueue.empty() && VidoeQueue.empty() && VidoeAVF.empty())
+		{
+			break;
+		}
+
 		if(!AudioQueue.empty())
 		{
 			AVPacket* pkt = AudioQueue.front();
@@ -141,5 +137,5 @@ void Mt_ReadThread::queueClear()
 			frame = NULL;
 		}
 	}
-	mux.unlock();
+
 }

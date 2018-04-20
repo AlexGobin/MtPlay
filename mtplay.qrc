@@ -1,0 +1,7 @@
+<RCC>
+  <qresource prefix="mtplay">
+    <file>im/play.png</file>
+    <file>im/open.png</file>
+    <file>im/pause.png</file>
+  </qresource>
+</RCC>

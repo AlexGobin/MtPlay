@@ -172,7 +172,7 @@ bool Mt_OpenVideo::Seek(double pos)
 	seekPos = pFormatCtx->streams[videoStream]->duration * pos;
 	int re = av_seek_frame(pFormatCtx, videoStream, seekPos,
 			AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME); //ÍùºóÕÒ¹Ø¼üÖ¡
-	vpts = seekPos *r2d(pFormatCtx->streams[videoStream]->time_base) * 1000;
+	//vpts = seekPos *r2d(pFormatCtx->streams[videoStream]->time_base) * 1000;
 	mux.unlock();
 	if (re < 0)
 	{
@@ -197,5 +197,13 @@ void Mt_OpenVideo::close()
 	if (pFormatCtx)
 	{
 		avformat_close_input(&pFormatCtx);
+	}
+	if (vs)
+	{
+		avcodec_parameters_free(&vs);
+	}
+	if (as)
+	{
+		avcodec_parameters_free(&as);
 	}
 }

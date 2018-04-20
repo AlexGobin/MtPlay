@@ -7,6 +7,7 @@
 #include "Mt_deque.h"
 #include "Mt_AudioThread.h"
 #include "Mt_ReadThread.h"
+#include <QTimer>
 
 class mtplay : public QWidget
 {
@@ -19,6 +20,9 @@ public:
 public slots:
 	//打开按钮槽函数
 	void openfile();
+
+	//暂停播放
+	void isPause();
 
 	//显示视频总时长
 	void ShowVideoTime(int totalMs1);
@@ -67,13 +71,15 @@ public:
 	void videosize(int width, int height);
 
 	//重写定时器函数
-	void timerEvent(QTimerEvent *e);
+	void RefreshTimer();
 
 	
 private:
 	Ui::mtplayClass ui;
 
 	bool isPress = false;
+
+	QTimer * timer = NULL;  //定时器
 
 signals:
 	void videoTd();						//视频启动线程信号
