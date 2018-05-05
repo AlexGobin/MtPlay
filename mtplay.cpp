@@ -12,10 +12,15 @@ mtplay::mtplay(QWidget *parent)
 	//启动所有线程
 	openThread();
 
-	//定时器
+	//发动条移动定时器
 	timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &mtplay::RefreshTimer);
 	timer->start(40);
+
+		//显示定时器
+// 	showVideo = new QTimer(this);
+//  	connect(showVideo, &QTimer::timeout, ui.video, &Mt_VideoWidget::Repaint);
+//  	showVideo->start(2);
 
 	//打开按钮
 	connect(ui.btn_open, &QPushButton::clicked, this, &mtplay::openfile);
@@ -42,8 +47,14 @@ mtplay::mtplay(QWidget *parent)
 
 mtplay::~mtplay()
 {
+	delete QAudiaoThread;
+	delete AudiaoThread;
 	
-	
+	delete QVideoThread;
+	delete VideoThread;
+
+	delete ReadThread;
+	delete QReadThread;
 }
 
 //打开文件
@@ -81,10 +92,10 @@ void mtplay::ShowVideoTime(int totalMs1)
 //鼠标按下滑动条事件
 void mtplay::SliderPress()
 {
-	ThreadPress(true);
 	timer->stop();
-	ReadThread->queueClear();
+	ThreadPress(true);
 	//ThreadClear();
+	//ReadThread->queueClear();
 
 }
 
@@ -95,12 +106,8 @@ void mtplay::SliderRelease()
 	//std::cout << "松开了滑动条!" << std::endl;
 	double pos = 0.0;
 	pos = (double)ui.mySlider->value() / (double)ui.mySlider->maximum();
-	std::cout << "pos:" << pos << std::endl;
-	//ui.mySlider->setValue(pos * 1000);
-
-	QThread::msleep(3);
-	ReadThread->seek(pos); //清空缓冲
-	
+	std::cout << "pos:" << pos << std::endl;	
+	ReadThread->seek(pos); //清空缓冲	
 	ThreadPress(false);
 	timer->start(40);
 }
@@ -109,7 +116,9 @@ void mtplay::SliderRelease()
 //右上角关闭链接槽函数
 void mtplay::myClose()
 {
-	//回收视频线程
+
+	ThreadPress(true);
+	timer->stop();
 	delete timer;  //回收定时器
 	VideoThread->set(false);
 	AudiaoThread->set(false);
@@ -118,21 +127,18 @@ void mtplay::myClose()
 
 	QVideoThread->quit();
 	QVideoThread->wait();
-	delete QVideoThread;
-	delete VideoThread;
+	
 
 	//回收音频线程
 
 	QAudiaoThread->quit();
 	QAudiaoThread->wait();
-	delete QAudiaoThread;
-	delete AudiaoThread;
+	
 	//回收音视频分离线程
 
 	QReadThread->quit();
 	QReadThread->wait();
-	delete ReadThread;
-	delete QReadThread;
+	
 
 }
 

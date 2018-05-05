@@ -81,6 +81,8 @@ private:
 
 	QTimer * timer = NULL;  //定时器
 
+	//QTimer * showVideo = NULL;  //定时器
+
 signals:
 	void videoTd();						//视频启动线程信号
 

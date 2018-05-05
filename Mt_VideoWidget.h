@@ -18,7 +18,7 @@ public:
 
 public:
 	//初始化opengl
-	void Init(int width, int height);
+	void Init(int width, int height , int videofmt);
 	//显卡转码
 	void Repaint();
 protected:
@@ -30,8 +30,21 @@ protected:
 	void resizeGL(int width, int height);
 
 private:
-	std::mutex mux;
+	int Ysize = 0;		//Y
+	int Vsize = 0;		//U						
+	int Usize = 0;		//V
 
+	int Ywidth = 0;		//Y
+	int Yheight = 0;
+
+	int Uwidth = 0;		//U
+	int Uheight = 0;
+
+	int Vwidth = 0;		//V
+	int Vheight = 0;
+
+
+	std::mutex mux;
 	//shader程序
 	QGLShaderProgram program;
 

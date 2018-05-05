@@ -33,6 +33,9 @@
       <Extensions>cpp;moc</Extensions>
       <SourceControlFiles>False</SourceControlFiles>
     </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{3f32e23c-3013-47e3-a662-30c09e9d4d8d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -137,6 +140,9 @@
     </ClInclude>
     <ClInclude Include="Mt_AudioPlay.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HFYqueue.hpp">
+      <Filter>data</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

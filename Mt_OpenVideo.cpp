@@ -60,10 +60,11 @@ int Mt_OpenVideo::open(const char * filename)
 	}
 
 	//打印视频文件信息
-	//av_dump_format(pFormatCtx, 0, filename, 0);
+	av_dump_format(pFormatCtx, 0, filename, 0);
 	//获取视频总时长
 	this->totalMs = (pFormatCtx->duration / AV_TIME_BASE) * 1000;
 	std::cout << "视频总时长" << totalMs << std::endl;
+	
 
 	//获取视频
 	videoStream = av_find_best_stream(pFormatCtx, AVMEDIA_TYPE_VIDEO, -1, -1, NULL, 0);
@@ -71,6 +72,7 @@ int Mt_OpenVideo::open(const char * filename)
 	this->width = avs->codecpar->width;    //宽
 	this->height = avs->codecpar->height;	//高
 	this->fps = r2d(avs->avg_frame_rate);  //fps
+	this->videoFMt = (int)pFormatCtx->streams[videoStream]->codec->pix_fmt;
 
 	//获取音频
 	audioStream = av_find_best_stream(pFormatCtx, AVMEDIA_TYPE_AUDIO, -1, -1, NULL, 0);
@@ -115,7 +117,7 @@ bool Mt_OpenVideo::AVSeparate(AVPacket *pkt)
 	if (pkt->stream_index == videoStream)
 	{
 		//av_packet_free(&pkt);
-		VidoeQueue.push(pkt);
+		VideoQueue.push(pkt);
 		return true;
 	}
 
@@ -170,6 +172,7 @@ bool Mt_OpenVideo::Seek(double pos)
 	avformat_flush(pFormatCtx);
 	long long seekPos = 0;
 	seekPos = pFormatCtx->streams[videoStream]->duration * pos;
+	std::cout << "seekPos:" <<seekPos<< std::endl;
 	int re = av_seek_frame(pFormatCtx, videoStream, seekPos,
 			AVSEEK_FLAG_BACKWARD | AVSEEK_FLAG_FRAME); //往后找关键帧
 	//vpts = seekPos *r2d(pFormatCtx->streams[videoStream]->time_base) * 1000;

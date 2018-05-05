@@ -15,6 +15,7 @@ public:
 	AVCodec *vcodec = NULL;
 	//解码的PTS
 	long long pts = 0;
+	int videoFMt = 0;
 
 public:
 	//打开视频解码器
@@ -32,6 +33,7 @@ public:
 
 	//清理回收内存.
 	void close();
+
 protected:
 	AVCodecContext *codec = NULL;
 	std::mutex mux;

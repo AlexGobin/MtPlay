@@ -24,6 +24,7 @@ const char *tString = GET_STR(
 	uniform sampler2D tex_y;
 	uniform sampler2D tex_u;
 	uniform sampler2D tex_v;
+
 void main(void)
 {
 	vec3 yuv;
@@ -52,7 +53,7 @@ Mt_VideoWidget::~Mt_VideoWidget()
 
 
 //初始化显卡
-void Mt_VideoWidget::Init(int width, int height)
+void Mt_VideoWidget::Init(int width, int height, int videofmt)
 {
 
 	//std::cout << "--------------------显卡模块初始化!--------------------------" << std::endl;
@@ -63,10 +64,63 @@ void Mt_VideoWidget::Init(int width, int height)
 	delete datas[1];
 	delete datas[2];
 
+	//YUV420
+	if (videofmt == 0)
+	{
+		std::cout << "---- YUV420 ----"<<std::endl;
+		this->Ysize = width * height;
+		this->Usize = width * height / 4;
+		this->Vsize = width * height / 4;
+
+		this->Ywidth = width;
+		this->Yheight = height;
+
+		this->Uwidth = width / 2;
+		this->Uheight = height / 2;
+
+		this->Vwidth = width / 2;
+		this->Vheight = height / 2;
+	}
+
+	else if (videofmt == 4)
+	{
+		std::cout << "---- YUV422 ----" << std::endl;
+		this->Ysize = width * height;
+		this->Usize = width * height;
+		this->Vsize = width * height;
+
+		this->Ywidth = width;
+		this->Yheight = height;
+
+		this->Uwidth = width;
+		this->Uheight = height/2;
+
+		this->Vwidth = width;
+		this->Vheight = height/2;
+	}
+
+	//YUV444
+	else if (videofmt == 5)
+	{
+		std::cout << "---- YUV444 ----" << std::endl;
+		this->Ysize = width * height;
+		this->Usize = width * height;
+		this->Vsize = width * height;
+
+		this->Ywidth = width;
+		this->Yheight = height;
+
+		this->Uwidth = width ;
+		this->Uheight = height;
+
+		this->Vwidth = width ;
+		this->Vheight = height ;
+	}
+
 	///分配材质内存空间
-	datas[0] = new unsigned char[width*height];		//Y
-	datas[1] = new unsigned char[width*height / 4];	//U
-	datas[2] = new unsigned char[width*height / 4];	//V
+	datas[0] = new unsigned char[this->Ysize];	//Y
+	datas[1] = new unsigned char[this->Usize];	//U
+	datas[2] = new unsigned char[this->Vsize];	//V
 
 
 	if (texs[0])
@@ -82,7 +136,7 @@ void Mt_VideoWidget::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//创建材质显卡空间
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width, height, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, Ywidth, Yheight, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
 
 	//U
 	glBindTexture(GL_TEXTURE_2D, texs[1]);
@@ -90,7 +144,7 @@ void Mt_VideoWidget::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//创建材质显卡空间
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width / 2, height / 2, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, Uwidth , Uheight, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
 
 	//V
 	glBindTexture(GL_TEXTURE_2D, texs[2]);
@@ -98,7 +152,7 @@ void Mt_VideoWidget::Init(int width, int height)
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	//创建材质显卡空间
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, width / 2, height / 2, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, Vwidth, Vheight, 0, GL_RED, GL_UNSIGNED_BYTE, 0);
 	mux.unlock();
 }
 
@@ -106,48 +160,63 @@ void Mt_VideoWidget::Init(int width, int height)
 void Mt_VideoWidget::Repaint()
 {
 	//std::cout << "视频显示模块启动!!!" << std::endl;
-	mux.lock();
-	AVFrame *frame = VidoeAVF.front();
-	VidoeAVF.pop();
-	if (!frame)
-		return;
 
+	if (vpts >apts)
+	{
+		return;
+	}
+	AVFrame *frame = VidoeAVF.pop();
+	if (!frame)
+	{
+		return;
+	}
+		
 	//容错，保证尺寸正确
 	if (!datas[0] || width*height == 0 || frame->width != this->width || frame->height != this->height)
 	{
 		av_frame_free(&frame);
-		mux.unlock();
+		//mux.unlock();
 		return;
 	}
 	if (width == frame->linesize[0]) //无需对齐
 	{
-		memcpy(datas[0], frame->data[0], width*height);
-		memcpy(datas[1], frame->data[1], width*height / 4);
-		memcpy(datas[2], frame->data[2], width*height / 4);
+		memcpy(datas[0], frame->data[0], Ysize);
+		memcpy(datas[1], frame->data[1], Usize);
+		memcpy(datas[2], frame->data[2], Vsize);
 	}
 	else//行对齐问题
 	{
-		for (int i = 0; i < height; i++) //Y 
-			memcpy(datas[0] + width*i, frame->data[0] + frame->linesize[0] * i, width);
-		for (int i = 0; i < height / 2; i++) //U
-			memcpy(datas[1] + width / 2 * i, frame->data[1] + frame->linesize[1] * i, width);
-		for (int i = 0; i < height / 2; i++) //V
-			memcpy(datas[2] + width / 2 * i, frame->data[2] + frame->linesize[2] * i, width);
-
+		//Y 
+		for (int i = 0; i < height; i++)
+		{
+			memcpy(datas[0] + Ywidth * i, frame->data[0] + frame->linesize[0] * i, width);
+		}
+			
+		//U
+		for (int i = 0; i < height / 2; i++)
+		{
+			memcpy(datas[1] + Uwidth  * i, frame->data[1] + frame->linesize[1] * i, width);
+		}
+			
+		//V
+		for (int i = 0; i < height / 2; i++)
+		{
+			memcpy(datas[2] + Vwidth  * i, frame->data[2] + frame->linesize[2] * i, width);
+		}			
 	}
 
-	mux.unlock();
+	//mux.unlock();
 	av_frame_free(&frame);
 	update();
 }
 
 void Mt_VideoWidget::paintGL()
 {
-	mux.lock();
+	//mux.lock();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texs[0]); //0层绑定到Y材质
 										   //修改材质内容(复制内存内容)
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width, height, GL_RED, GL_UNSIGNED_BYTE, datas[0]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Ywidth, Yheight, GL_RED, GL_UNSIGNED_BYTE, datas[0]);
 	//与shader uni遍历关联
 	glUniform1i(unis[0], 0);
 
@@ -155,25 +224,25 @@ void Mt_VideoWidget::paintGL()
 	glActiveTexture(GL_TEXTURE0 + 1);
 	glBindTexture(GL_TEXTURE_2D, texs[1]); //1层绑定到U材质
 	//修改材质内容(复制内存内容)
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width / 2, height / 2, GL_RED, GL_UNSIGNED_BYTE, datas[1]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Uwidth , Uheight , GL_RED, GL_UNSIGNED_BYTE, datas[1]);
 	//与shader uni遍历关联
 	glUniform1i(unis[1], 1);
 
 	glActiveTexture(GL_TEXTURE0 + 2);
 	glBindTexture(GL_TEXTURE_2D, texs[2]); //2层绑定到V材质
 										   //修改材质内容(复制内存内容)
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, width / 2, height / 2, GL_RED, GL_UNSIGNED_BYTE, datas[2]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, Vwidth ,Vheight , GL_RED, GL_UNSIGNED_BYTE, datas[2]);
 	//与shader uni遍历关联
 	glUniform1i(unis[2], 2);
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	//qDebug() << "paintGL";
-	mux.unlock();
+	//mux.unlock();
 }
 
 void Mt_VideoWidget::initializeGL()
 {
-	mux.lock();
+	//mux.lock();
 	//初始化opengl （QOpenGLFunctions继承）函数 
 	initializeOpenGLFunctions();
 
@@ -225,7 +294,7 @@ void Mt_VideoWidget::initializeGL()
 	unis[1] = program.uniformLocation("tex_u");
 	unis[2] = program.uniformLocation("tex_v");
 
-	mux.unlock();
+	//mux.unlock();
 }
 
 void Mt_VideoWidget::resizeGL(int width, int height)

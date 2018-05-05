@@ -79,7 +79,6 @@ bool Mt_VideoDecode::open(AVCodecParameters *para)
 		return false;
 	}
 	std::cout << "avcodec_open2() success!" << std::endl;
-	
 	return true;
 }
 

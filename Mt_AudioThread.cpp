@@ -60,12 +60,15 @@ void Mt_AudioThread::run()
 			QThread::msleep(2);
 			continue;
 		}
-		pkt = AudioQueue.front();
-		AudioQueue.pop();
+
+		pkt = AudioQueue.pop();
+	
 		audio->send(pkt); //发送到解码线程	
 		
 		while (audio->recv(&frame))
 		{		
+			//std::cout << "frame->apts:" << frame->pts << std::endl;
+			Apts = frame->pts;
 			apts = audio->apts - audio->GetNoPlayMs();//计算PTS 减去缓冲中为播放的时间	
 		//	std::cout << "apts:" << apts <<std::endl;
 			int size = audio->AudioResamle(frame, pcm);

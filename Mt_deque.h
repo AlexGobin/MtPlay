@@ -8,6 +8,7 @@
 #include <QThread>
 #include <QString>
 #include <queue>
+#include "HFYqueue.hpp"
 
 extern "C" {
 #include "libavcodec/avcodec.h"
@@ -30,16 +31,30 @@ extern "C" {
 
 extern long long apts;  //音频PTS
 extern long long vpts;  //视频PTS
+extern long long Apts;
 
 extern AVStream *avs;
+
+extern HFYqueue<AVPacket*> AudioQueue;
+extern HFYqueue<AVPacket*> VideoQueue;
+
+extern HFYqueue<AVFrame*> VidoeAVF;
+
+
 //队列
-extern std::queue<AVPacket*> AudioQueue;	//音频队列
-extern std::queue<AVPacket*> VidoeQueue;	//视频队列
-
-
-extern std::queue<AVFrame *> VidoeAVF;
+// extern std::queue<AVPacket*> AudioQueue;	//音频队列
+// extern std::queue<AVPacket*> VidoeQueue;	//视频队列
+// 
+// extern std::queue<AVFrame *> VidoeAVF;
 
 extern AVCodecParameters *vs ;
 extern AVCodecParameters *as ;
+
+// enum AVPixelFormat {
+// 	AV_PIX_FMT_YUV420P =0,   ///< planar YUV 4:2:0, 12bpp, (1 Cr & Cb sample per 2x2 Y samples)
+// 	AV_PIX_FMT_YUV422P =4,   ///< planar YUV 4:2:2, 16bpp, (1 Cr & Cb sample per 2x1 Y samples)
+// 	AV_PIX_FMT_YUV444P =5,  ///< planar YUV 4:4:4, 24bpp, (1 Cr & Cb sample per 1x1 Y samples)
+// };
+
 
 #endif

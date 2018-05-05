@@ -14,6 +14,7 @@ public:
 	int width = 0;			//视频宽
 	int height = 0;			//视频高
 	int fps = 0;
+	int videoFMt = 0;		//视频YUV格式
 
 	int videoStream = -1;	//视频索引编号
 	int audioStream = -2;	//音频索引编号
@@ -28,7 +29,6 @@ public:
 	AVFormatContext	* pFormatCtx = NULL;
 	//获取视频或音频信息
 	//AVCodecParameters * AV = NULL;
-	//
 	std::mutex mux;
 
 public:

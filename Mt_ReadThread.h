@@ -37,14 +37,14 @@ public:
 	void queueClear();    //Çå¿Õpkt¶ÓÁÐ
 public:
 	Mt_OpenVideo * IO = NULL;
-	
 	std::mutex mux;
+
 signals:
 	void VideoStart(int fps);
 
 	void AudioStart();
 
-	void Initshow(int w, int h);
+	void Initshow(int w, int h,int videoFMT);
 
 	void VideoTime(int);
 };

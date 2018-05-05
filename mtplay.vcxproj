@@ -242,6 +242,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_mtplay.h" />
+    <ClInclude Include="HFYqueue.hpp" />
     <ClInclude Include="Mt_AudioPlay.h" />
     <CustomBuild Include="Mt_AudioThread.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

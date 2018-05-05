@@ -43,36 +43,40 @@ void Mt_VideoThread::run(int fps)
 
 	while (isexit)
 	{
+		
 		if (this->isPress)
 		{
 			QThread::msleep(5);
 			continue;
 		}
 	
-		if (VidoeQueue.empty())
+		if ( VideoQueue.empty() || VidoeAVF.size() > 30 )
 		{			
-			QThread::msleep(3);
+			QThread::msleep(2);
 			continue;
 		}
-
-		pkt = VidoeQueue.front();
-		VidoeQueue.pop();
-
+	
+		pkt = VideoQueue.pop();
+	
 		DE->send(pkt);    //½âÂë
-		//vpts = frame->pts * av_q2d(avs->time_base) ;
-		//std::cout << "vpts:" << vpts<<std::endl;
+		
 		DE->recv(&frame);			
 		if (!frame)		
 			continue;
-		vpts =  (av_q2d(avs->time_base)) * frame->pts  * 1000;	
-		while (vpts > apts)
+		//std::cout << "frame->Vpts:" << frame->pts << std::endl;
+		//vpts =  (av_q2d(avs->time_base)) * frame->pts  * 1000;	
+		//std::cout << vpts << std::endl;
+		vpts = frame->pts;
+
+		while ( vpts > Apts && vpts >0)
 		{
-			QThread::msleep(5);
-		}		
+			QThread::msleep(1);
+			continue;
+		}
 		VidoeAVF.push(frame);
 		emit show();
 
-		//QThread::msleep(1000 / fps - );
+		QThread::msleep((1000 / fps)/2 );
 			
 	}		
 	ThreadClear();
