@@ -62,8 +62,8 @@ bool Mt_VideoDecode::open(AVCodecParameters *para)
 	}
 	std::cout << "find the AVCodec " << para->codec_id << std::endl;
 	
-	codec = avcodec_alloc_context3(vcodec);
 	//配置解码器上下文
+	codec = avcodec_alloc_context3(vcodec);
 	avcodec_parameters_to_context(codec, para);
 	
 	int x = GetCPU_num();
@@ -118,7 +118,7 @@ void Mt_VideoDecode::DecodeClear()
 {
 	if (codec)
 	{
-		avcodec_flush_buffers(codec);
+		avcodec_flush_buffers(codec);	
 	}
 }
 

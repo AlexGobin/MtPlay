@@ -15,7 +15,7 @@ public:
 	~Mt_VideoThread();
 	
 public:
-	static bool isexit;  //线程停止变量
+	static bool isExit;  //线程停止变量
 
 	static bool isPress;   //线程暂停
 

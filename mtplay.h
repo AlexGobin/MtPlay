@@ -24,6 +24,9 @@ public slots:
 	//暂停播放
 	void isPause();
 
+	//退出当前播放视频
+	void playClose();
+
 	//显示视频总时长
 	void ShowVideoTime(int totalMs1);
 
@@ -67,9 +70,12 @@ public:
 	 //窗口尺寸变化
 	void resizeEvent(QResizeEvent *e);
 
-	//根据视频设置窗口大小
-	void videosize(int width, int height);
+	//双击全屏
+	void mouseDoubleClickEvent(QMouseEvent *e);
 
+	//
+	void VideoStop();
+	
 	//重写定时器函数
 	void RefreshTimer();
 

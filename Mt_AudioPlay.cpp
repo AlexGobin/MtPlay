@@ -52,6 +52,7 @@ Mt_AudioPlay::~Mt_AudioPlay()
 bool Mt_AudioPlay::open()
 {
 	QAudioFormat fmt;
+	
 	fmt.setSampleRate(sampleRate);		//设置样本率
 	fmt.setSampleSize(sampleSize);		//设置通道数	
 	fmt.setChannelCount(channels);		//设置样本大小
@@ -67,12 +68,12 @@ bool Mt_AudioPlay::open()
 	}
 
 	output = new QAudioOutput(fmt);
+	
 	io = output->start();
 	if (io)
 	{
 		return true;
 	}
-
 	//std::cout << "打开音频播放器成功!!" << std::endl;
 	return false;
 }
@@ -86,7 +87,7 @@ bool Mt_AudioPlay::play(const unsigned char *data, int datasize)
 
 	if (!output || !io)
 		return false;
-
+	
 	int size = io->write((char *)data, datasize);
 	if (datasize != size)	
 		return false;
@@ -184,7 +185,6 @@ bool Mt_AudioPlay::openDecode(AVCodecParameters * para)
 
 	//创建音频编码器上下文
 	ac = avcodec_alloc_context3(codec);
-
 	if (ac == NULL)
 	{
 		//std::cout << "avcodec_alloc_context3  failed!" << std::endl;
@@ -294,5 +294,22 @@ void Mt_AudioPlay::AudioClear()
 	{
 		avcodec_flush_buffers(ac); //清除音频解码缓冲
 	}
+}
+
+//回收内存
+void Mt_AudioPlay::close()
+{
+	if (io)
+	{
+		io->close();
+		io = NULL;
+	}
+	if (output)
+	{
+		output->stop();
+		delete output;
+		output = NULL;
+	}
+
 }
 

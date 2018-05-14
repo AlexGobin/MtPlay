@@ -15,26 +15,32 @@ public:
 	~Mt_ReadThread();
 
 public:
-	static bool isExit;  //结束run线程循环
+	static bool isExit;				//结束run线程循环
 
-	static bool isPress;  //线程暂停
+	static bool isPress;			//线程暂停
 
-	int totalMS = 0; //视频总时长
+	int totalMS = 0;				//视频总时长
 
 public:
-	void run(QString filename);  //线程处理函数
+	void run(QString filename);		 //线程处理函数
 
-	void set(bool isexit);		//线程停止
+	void set(bool isexit);			 //线程停止
 
 	void ThreadPress(bool isPress);  //线程暂停
 
-	void close();  //线程清理函数
+	void close();					//线程清理函数
 
-	void seek(double pos);  //播放位置函数
+	void seek(double pos);			//播放位置函数
 
-	void ThreadClear();    //清理线程缓冲
+	void ThreadClear();				//清理线程缓冲
 
-	void queueClear();    //清空pkt队列
+	void queueClear();				//清空pkt队列
+
+	void vPktQueueClear();			//清空视频队列
+
+	void aPktQueueClear();			//清空音频队列	
+
+	void vFrameQueueClear();		//清空视频frame队列
 public:
 	Mt_OpenVideo * IO = NULL;
 	std::mutex mux;

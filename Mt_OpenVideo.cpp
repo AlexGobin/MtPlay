@@ -9,12 +9,11 @@ static double r2d(AVRational r)
 Mt_OpenVideo::Mt_OpenVideo()
 {
 	static bool isFrist = true;
-	if (true)
+	if (isFrist)
 	{
 		av_register_all();         //初始化
-		avformat_network_init();
-		//注册解码器
-		avcodec_register_all();
+		avformat_network_init();		
+		avcodec_register_all();//注册解码器
 		isFrist = false;
 	}
 }
@@ -29,13 +28,13 @@ Mt_OpenVideo::~Mt_OpenVideo()
 int Mt_OpenVideo::open(const char * filename)
 {
 	close();
-	//分配空间
-	pFormatCtx = avformat_alloc_context();
-	if (pFormatCtx == NULL)
-	{
-		std::cout << "avformat_alloc_context() failed!" << std::endl;
-		return -1;
-	}
+	////分配空间
+	//pFormatCtx = avformat_alloc_context();
+	//if (pFormatCtx == NULL)
+	//{
+	//	std::cout << "avformat_alloc_context() failed!" << std::endl;
+	//	return -1;
+	//}
 
 	AVDictionary * opts = NULL;
 	//设置rtsp流以tcp协议打开
@@ -201,6 +200,7 @@ void Mt_OpenVideo::close()
 	{
 		avformat_close_input(&pFormatCtx);
 	}
+
 	if (vs)
 	{
 		avcodec_parameters_free(&vs);

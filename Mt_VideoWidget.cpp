@@ -161,10 +161,6 @@ void Mt_VideoWidget::Repaint()
 {
 	//std::cout << "视频显示模块启动!!!" << std::endl;
 
-	if (vpts >apts)
-	{
-		return;
-	}
 	AVFrame *frame = VidoeAVF.pop();
 	if (!frame)
 	{
@@ -212,7 +208,7 @@ void Mt_VideoWidget::Repaint()
 
 void Mt_VideoWidget::paintGL()
 {
-	//mux.lock();
+	mux.lock();
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texs[0]); //0层绑定到Y材质
 										   //修改材质内容(复制内存内容)
@@ -237,12 +233,12 @@ void Mt_VideoWidget::paintGL()
 
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 	//qDebug() << "paintGL";
-	//mux.unlock();
+	mux.unlock();
 }
 
 void Mt_VideoWidget::initializeGL()
 {
-	//mux.lock();
+	mux.lock();
 	//初始化opengl （QOpenGLFunctions继承）函数 
 	initializeOpenGLFunctions();
 
@@ -294,7 +290,7 @@ void Mt_VideoWidget::initializeGL()
 	unis[1] = program.uniformLocation("tex_u");
 	unis[2] = program.uniformLocation("tex_v");
 
-	//mux.unlock();
+	mux.unlock();
 }
 
 void Mt_VideoWidget::resizeGL(int width, int height)

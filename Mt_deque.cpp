@@ -19,3 +19,5 @@ HFYqueue<AVFrame*> VidoeAVF;
 
 AVCodecParameters *vs = NULL;
 AVCodecParameters *as = NULL;
+
+

@@ -23,7 +23,7 @@ void Mt_ReadThread::run(QString filename)
 {
 
 	//std::cout << "------------读取线程启动!-----------------" << std::endl;
-
+	//this->queueClear();		//队列内存清理
 	close();
 	int ret = IO->open(filename.toLocal8Bit());
 	if (ret != 0)
@@ -49,12 +49,12 @@ void Mt_ReadThread::run(QString filename)
 		//std::cout << "开始播放哪!!!!!" << std::endl;
 		if (this->isPress)
 		{
-			QThread::msleep(5);
+			QThread::msleep(2);
 			continue;
 		}
-		while (VideoQueue.size() > 30 || AudioQueue.size() > 30 ) //AudioQueue.size() >20 ||
+		while ((VideoQueue.size() > 30 || AudioQueue.size() > 30) && isExit != false ) 
 		{					
-			QThread::msleep(5);
+			QThread::msleep(2);
 			continue;
 		}
 		int ret = IO->read(&pkt);  //读取视频
@@ -68,9 +68,10 @@ void Mt_ReadThread::run(QString filename)
 		QThread::msleep(5);
 
 	}
-	ThreadClear();
-	queueClear();		//队列内存清理
-	close();
+	ThreadClear();	
+	this->close();
+	
+	std::cout << "read读取线程结束!" << std::endl;
 }
 
 void Mt_ReadThread::set(bool isexit)
@@ -105,33 +106,38 @@ void Mt_ReadThread::ThreadClear()
 
 void Mt_ReadThread::queueClear()
 {
-	while (true)
-	{
-		if (AudioQueue.empty() && VideoQueue.empty() && VidoeAVF.empty())
-		{
-			break;
-		}
-
-		if(!AudioQueue.empty())
-		{
-			AVPacket* pkt = AudioQueue.pop();
-			
-			av_packet_free(&pkt);
-			pkt = NULL;
-		}
-		if (!VideoQueue.empty())
-		{
-			AVPacket* pkt = AudioQueue.pop();
-			
-			av_packet_free(&pkt);
-			pkt = NULL;
-		}
-		if (!VidoeAVF.empty())
-		{
-			AVFrame * frame = VidoeAVF.pop();
-			av_frame_free(&frame);
-			frame = NULL;
-		}
-	}
-
+	this->aPktQueueClear();
+	this->vPktQueueClear();
 }
+
+void Mt_ReadThread::vPktQueueClear()
+{
+
+	while(VideoQueue.empty() != true)
+	{
+		AVPacket* pkt = AudioQueue.pop();
+		av_packet_free(&pkt);
+		
+	}
+}
+
+void Mt_ReadThread::aPktQueueClear()
+{
+	while (AudioQueue.empty() != true)
+	{
+		AVPacket* pkt = AudioQueue.pop();
+		av_packet_free(&pkt);
+		
+	}
+}
+
+void Mt_ReadThread::vFrameQueueClear()
+{
+	while(VidoeAVF.empty() != true)
+	{
+		AVFrame * frame = VidoeAVF.pop();
+		av_frame_free(&frame);
+		frame = NULL;
+	}
+}
+

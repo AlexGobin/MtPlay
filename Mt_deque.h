@@ -13,9 +13,9 @@
 extern "C" {
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
-#include <libswscale/swscale.h>
-#include <libavutil/imgutils.h>
-#include <libswresample/swresample.h>  //音频重采样
+#include "libswscale/swscale.h"
+#include "libavutil/imgutils.h"
+#include "libswresample/swresample.h"  //音频重采样
 }
 
 //编码解码
@@ -37,9 +37,9 @@ extern AVStream *avs;
 
 extern HFYqueue<AVPacket*> AudioQueue;
 extern HFYqueue<AVPacket*> VideoQueue;
-
 extern HFYqueue<AVFrame*> VidoeAVF;
 
+extern void HFYqueueClear();
 
 //队列
 // extern std::queue<AVPacket*> AudioQueue;	//音频队列

@@ -24,7 +24,7 @@ Mt_VideoThread::~Mt_VideoThread()
 	delete DE;
 }
 
-bool Mt_VideoThread::isexit = true;
+bool Mt_VideoThread::isExit = true;
 
 bool Mt_VideoThread::isPress = false;
 
@@ -41,16 +41,16 @@ void Mt_VideoThread::run(int fps)
 	}
 	QThread::msleep(1);
 
-	while (isexit)
+	while (isExit)
 	{
 		
 		if (this->isPress)
 		{
-			QThread::msleep(5);
+			QThread::msleep(2);
 			continue;
 		}
 	
-		if ( VideoQueue.empty() || VidoeAVF.size() > 30 )
+		if ( VideoQueue.empty() )
 		{			
 			QThread::msleep(2);
 			continue;
@@ -63,28 +63,24 @@ void Mt_VideoThread::run(int fps)
 		DE->recv(&frame);			
 		if (!frame)		
 			continue;
-		//std::cout << "frame->Vpts:" << frame->pts << std::endl;
-		//vpts =  (av_q2d(avs->time_base)) * frame->pts  * 1000;	
-		//std::cout << vpts << std::endl;
 		vpts = frame->pts;
-
-		while ( vpts > Apts && vpts >0)
+		while ( vpts > Apts && isExit != false )		//视频同步音频
 		{
 			QThread::msleep(1);
 			continue;
 		}
 		VidoeAVF.push(frame);
 		emit show();
-
-		QThread::msleep((1000 / fps)/2 );
-			
 	}		
+	
 	ThreadClear();
+	DE->close();
+	std::cout << "video解码线程结束1" << std::endl;
 }
 
 void Mt_VideoThread::set(bool isexit)
 {
-	this->isexit = isexit;
+	this->isExit = isexit;
 }
 
 //线程暂停函数

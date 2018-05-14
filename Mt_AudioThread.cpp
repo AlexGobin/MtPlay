@@ -21,7 +21,7 @@ bool Mt_AudioThread::isPause = false;
 //音频解码线程播放函数
 void Mt_AudioThread::run()
 {
-	std::cout <<" ----------------音频解码线程启动! -------------------"<< std::endl;
+	//std::cout <<" ----------------音频解码线程启动! -------------------"<< std::endl;
 	unsigned char *pcm = new unsigned char[1024*1024*10];
 	if (!pcm)	
 		return;
@@ -31,20 +31,17 @@ void Mt_AudioThread::run()
 
 	if (!audio->open()) //打开音频播放器
 	{
-		//std::cout << "打开音频播放器失败!" << std::endl;
 		return;
 	}
 			
 	if (!audio->openDecode(as)) 
 	{
-		//std::cout << "打开音频解码器失败!" << std::endl;
 		return;
 	}
 
 	//音频重采样初始化
 	if (!audio->InitResample(as))
-	{
-		//std::cout << "重采样初始化失败!" << std::endl;
+	{	
 		return;
 	}
 	
@@ -65,12 +62,15 @@ void Mt_AudioThread::run()
 	
 		audio->send(pkt); //发送到解码线程	
 		
-		while (audio->recv(&frame))
-		{		
-			//std::cout << "frame->apts:" << frame->pts << std::endl;
+		while (isExit)
+		{					
+			if (!audio->recv(&frame))
+			{
+				break;
+			}
 			Apts = frame->pts;
 			apts = audio->apts - audio->GetNoPlayMs();//计算PTS 减去缓冲中为播放的时间	
-		//	std::cout << "apts:" << apts <<std::endl;
+			//std::cout << "apts:" << apts <<std::endl;
 			int size = audio->AudioResamle(frame, pcm);
 			while (isExit)
 			{
@@ -81,6 +81,7 @@ void Mt_AudioThread::run()
 					QThread::msleep(2);
 					continue;
 				}
+				
 				audio->play(pcm, size);  //播放音频
 				break;
 			}			
@@ -88,7 +89,10 @@ void Mt_AudioThread::run()
 	}			
 	
 	ThreadClear();
-	delete pcm;
+	audio->close();
+	delete [] pcm;
+	std::cout << "audio线程结束!" << std::endl;
+
 }
 
 //设置线程循环停止

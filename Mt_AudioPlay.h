@@ -24,9 +24,9 @@ public:
 	int channels = 2;			//通道数
 	long long apts = 0;			//音频PTS
 
-	//音频播放
-	QAudioOutput *output = NULL;
+	QAudioOutput *output = NULL;                    //音频播放
 	QIODevice *io = NULL;
+	
 
 	//音频
 	SwrContext * asc = NULL;		//音频重采样上下文
@@ -68,6 +68,9 @@ public:
 
 	//清理音频缓冲
 	void AudioClear();
+
+	//回收内存
+	void close();
 
 
 public:
